@@ -8,7 +8,7 @@ aside:
 show_edit_on_github: true
 ---
 
-**Version 1.3.1 (September 28, 2022)**
+**Version 1.4.0 (February 21, 2023)**
 
 Original authors:
 - Oliver Chang (ochang@google.com)
@@ -75,6 +75,10 @@ A JSON Schema for validation is also available
 			"name": string,
 			"purl": string
 		},
+		"severity": [ {
+			"type": string,
+			"score": string
+		} ],
 		"ranges": [ {
 			"type": string,
 			"repo": string,
@@ -96,7 +100,8 @@ A JSON Schema for validation is also available
 	} ],
 	"credits": [ {
 		"name": string,
-		"contact": [ string ]
+		"contact": [ string ],
+		"type": [ string ]
 	} ],
 	"database_specific": { see description }
 }
@@ -297,6 +302,10 @@ on the selected `severity[].type`, as described above.
 			"name": string,
 			"purl": string
 		},
+		"severity": [ {
+			"type": string,
+			"score": string
+		} ],
 		"ranges": [ {
 			"type": string,
 			"repo": string,
@@ -388,11 +397,20 @@ The defined ecosystems are:
 | `Android`  | The Android ecosystem; the `name` field is the Android component name that the patch applies to, as shown in the [Android Security Bulletins](https://source.android.com/security/bulletin) such as `Framework`, `Media Framework` and `Kernel Component`. The exhaustive list of components can be found at the [Appendix](#android-ecosystem-components). |
 | `GitHub Actions` | The GitHub Actions ecosystem; the `name` field is the action's repository name with owner e.g. `{owner}/{repo}`. |
 | `Pub` | The package manager for the Dart ecosystem; the `name` field is a Dart package name. |
+| `ConanCenter` | The ConanCenter ecosystem for C and C++; the `name` field is a Conan package name.  |
 | Your ecosystem here. | [Send us a PR](https://github.com/ossf/osv-schema/compare). |
 
 It is permitted for a database name (the DB prefix in the `id` field) and an
 ecosystem name to be the same, provided they have the same owner who can make
 decisions about the meaning of the `ecosystem_specific` field (see below).
+
+### affected[].severity field
+
+The `severity` field is an optional element [defined here](#severity-field). 
+This `severity` field applies to a specific package, in cases where affected 
+packages have differing severities for the same vulnerability. If any package 
+level `severity` fields are set, the top level [`severity`](#severity-field) 
+must not be set. 
 
 ### affected[].versions field
 
@@ -710,6 +728,7 @@ The known reference `type` values are:
 	"credits": [ {
 		"name": string,
 		"contact": [ string ],
+		"type": [ string ],
 	} ]
 }
 ```
@@ -735,9 +754,28 @@ is required for each `credits` entry.
 Each `credits[].contact[]` entry should be a valid, fully qualified, plain-text URL
 at which the credited can be reached. Providing contacts is optional.
 
+### credits[].type[] field
+
+The optional `credits[].type[]` field should specify the type or role of the individual or entity
+being credited.  It must be one of the following defined credit types:
+
+- `FINDER`: identified the vulnerability.
+- `REPORTER`: notified the vendor of the vulnerability to a CNA.
+- `ANALYST`: validated the vulnerability to ensure accuracy or severity.
+- `COORDINATOR`: facilitated the coordinated response process.
+- `REMEDIATION_DEVELOPER`: prepared a code change or other remediation plans.
+- `REMEDIATION_REVIEWER`: reviewed vulnerability remediation plans or code changes for effectiveness and completeness.
+- `REMEDIATION_VERIFIER`: tested and verified the vulnerability or its remediation.
+- `TOOL`: names of tools used in vulnerability discovery or identification.
+- `SPONSOR`: supported the vulnerability identification or remediation activities.
+- `OTHER`: any other type or role that does not fall under the categories described above.
+
+These values and their definitions correspond directly to the credit types defined in the
+[MITRE CVE specification](https://cveproject.github.io/cve-schema/schema/v5.0/docs/#collapseDescription_oneOf_i0_containers_cna_credits_items_type).
+
 #### Examples
 
-Including a URL and an email address in `credits[].contact[]`:
+Including a URL and an email address in `credits[].contact[]` and a credit type:
 
 ```json
 {
@@ -747,6 +785,7 @@ Including a URL and an email address in `credits[].contact[]`:
 			"https://twitter.com/JaninaKowalska01",
 			"mailto:nina@kowalska-family.net"
 		],
+		"type": "REMEDIATION_DEVELOPER",
 	} ]
 }
 ```
@@ -1091,6 +1130,8 @@ Ruby does not use this format currently, but here is a potential translation of 
 - 2022-03-24 Released version 1.3.0. Added `last_affected` event type and
   `database_specific` to `affected[].ranges[]`.
   Context: https://github.com/ossf/osv-schema/issues/35.
+- 2023-02-21 Released version 1.4.0. Added per package `severity` and 
+  credit types. 
 
 ## Status - 2021-04-07
 
